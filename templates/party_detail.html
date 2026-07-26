@@ -26,7 +26,7 @@
 <div class="card" style="margin-bottom:1.2rem;">
     <div class="profile-header">
         {% if party.profile_pic %}
-        <img src="/static/{{ party.profile_pic }}" alt="{{ party.name }}" class="profile-avatar">
+        <img src="{{ party.profile_pic }}" alt="{{ party.name }}" class="profile-avatar">
         {% else %}
         <div class="profile-avatar" style="display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--text-muted); background:var(--bg);">{{ party.name[0].upper() }}</div>
         {% endif %}
@@ -83,8 +83,8 @@
         <span>{{ t('documents') }}</span>
     </div>
     <div class="documents-grid" id="documentsGrid">
-        {% if party.nid_front %}<div><p style="font-size:0.8rem; margin-bottom:0.2rem;">{{ t('front') }}</p><img src="/static/{{ party.nid_front }}" alt="NID Front" class="nid-image" onclick="window.open('/static/{{ party.nid_front }}', '_blank')"></div>{% endif %}
-        {% if party.nid_back %}<div><p style="font-size:0.8rem; margin-bottom:0.2rem;">{{ t('back') }}</p><img src="/static/{{ party.nid_back }}" alt="NID Back" class="nid-image" onclick="window.open('/static/{{ party.nid_back }}', '_blank')"></div>{% endif %}
+        {% if party.nid_front %}<div><p style="font-size:0.8rem; margin-bottom:0.2rem;">{{ t('front') }}</p><img src="{{ party.nid_front }}" alt="NID Front" class="nid-image" onclick="window.open('{{ party.nid_front }}', '_blank')"></div>{% endif %}
+        {% if party.nid_back %}<div><p style="font-size:0.8rem; margin-bottom:0.2rem;">{{ t('back') }}</p><img src="{{ party.nid_back }}" alt="NID Back" class="nid-image" onclick="window.open('{{ party.nid_back }}', '_blank')"></div>{% endif %}
     </div>
 </div>
 {% endif %}
@@ -96,12 +96,12 @@
         <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
             <thead><tr style="background:var(--bg);"><th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('date_time') }}</th><th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('type') }}</th><th style="padding:0.6rem 0.8rem; text-align:right;">{{ t('amount') }}</th><th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('description') }}</th></tr></thead>
             <tbody>
-            {% for t in transactions %}
+            {% for tr in transactions %}
             <tr style="border-bottom:1px solid var(--border);">
-                <td style="padding:0.5rem 0.8rem; color:var(--text-secondary);">{{ t.date.strftime('%d %b %Y %I:%M %p') }}</td>
-                <td style="padding:0.5rem 0.8rem;"><span class="badge {{ 'badge-red' if t.transaction_type=='due' else 'badge-green' }}">{{ t('due') if t.transaction_type=='due' else t('paid') }}</span></td>
-                <td style="padding:0.5rem 0.8rem; text-align:right; font-weight:600; white-space:nowrap; color:{{ '#dc2626' if t.transaction_type=='due' else '#059669' }};">{{ '-' if t.transaction_type=='due' else '+' }}Tk {{ "%.2f"|format(t.amount) }}</td>
-                <td style="padding:0.5rem 0.8rem;">{{ t.description or '-' }}</td>
+                <td style="padding:0.5rem 0.8rem; color:var(--text-secondary);">{{ tr.date.strftime('%d %b %Y %I:%M %p') }}</td>
+                <td style="padding:0.5rem 0.8rem;"><span class="badge {{ 'badge-red' if tr.transaction_type=='due' else 'badge-green' }}">{{ t('due') if tr.transaction_type=='due' else t('paid') }}</span></td>
+                <td style="padding:0.5rem 0.8rem; text-align:right; font-weight:600; white-space:nowrap; color:{{ '#dc2626' if tr.transaction_type=='due' else '#059669' }};">{{ '-' if tr.transaction_type=='due' else '+' }}Tk {{ "%.2f"|format(tr.amount) }}</td>
+                <td style="padding:0.5rem 0.8rem;">{{ tr.description or '-' }}</td>
             </tr>
             {% endfor %}
             </tbody>

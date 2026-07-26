@@ -1,9 +1,14 @@
+# main.py - Complete GaragePro Management System
+# With Free Image Hosting, PostgreSQL Support, and Full Backup
+
 import os
 import uuid
 import json
 import csv
 import zipfile
 import io
+import base64
+import requests
 from io import StringIO
 from datetime import datetime, date, timedelta, timezone
 from functools import wraps
@@ -16,20 +21,21 @@ from sqlalchemy import or_, func
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'garage-pro-secure-key-2025'
-import os
 
+# ---------- Database Config ----------
 database_url = os.environ.get('DATABASE_URL', 'sqlite:///garage.db')
 if database_url and database_url.startswith('postgres://'):
     database_url = database_url.replace('postgres://', 'postgresql://', 1)
 
 app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8 MB
 
 db = SQLAlchemy(app)
-os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'profiles'), exist_ok=True)
-os.makedirs(os.path.join(app.config['UPLOAD_FOLDER'], 'nid'), exist_ok=True)
+
+# ---------- Free Image Host API Config ----------
+IMAGE_HOST_API_KEY = "6d207e02198a847aa98d0a2a901485a5"
+IMAGE_HOST_UPLOAD_URL = "https://freeimage.host/api/1/upload"
 
 # ---------- Models ----------
 class Admin(db.Model):
@@ -54,9 +60,9 @@ class Party(db.Model):
     address = db.Column(db.Text)
     vehicle_number = db.Column(db.String(20))
     vehicle_model = db.Column(db.String(100))
-    profile_pic = db.Column(db.String(200))
-    nid_front = db.Column(db.String(200))
-    nid_back = db.Column(db.String(200))
+    profile_pic = db.Column(db.Text)
+    nid_front = db.Column(db.Text)
+    nid_back = db.Column(db.Text)
     total_due = db.Column(db.Float, default=0.0)
     total_paid = db.Column(db.Float, default=0.0)
     is_active = db.Column(db.Boolean, default=True)
@@ -126,7 +132,25 @@ def generate_bill_number():
             return bill
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
+
+def upload_to_image_host(file):
+    """Upload a file to freeimage.host and return the URL."""
+    try:
+        file_data = base64.b64encode(file.read()).decode()
+        resp = requests.post(
+            IMAGE_HOST_UPLOAD_URL,
+            data={"key": IMAGE_HOST_API_KEY, "action": "upload", "source": file_data},
+            timeout=30
+        )
+        result = resp.json()
+        url = result.get('image', {}).get('display_url')
+        if url:
+            return url
+        return None
+    except Exception as e:
+        print(f"Image upload error: {e}")
+        return None
 
 def login_required(f):
     @wraps(f)
@@ -206,19 +230,19 @@ translations = {
         'admins': 'Admins', 'broadcast_sms': 'Broadcast SMS', 'settings': 'Settings',
         'logout': 'Sign out', 'bills': 'Bills', 'more': 'More', 'sign_in': 'Sign in',
         'username': 'Username', 'password': 'Password',
-        'default_credentials': 'Default: sagor / sagor123', 'welcome': 'Welcome!',
-        'invalid_credentials': 'Invalid credentials.', 'logged_out': 'Logged out.',
-        'add_party': 'Add Party', 'edit': 'Edit', 'delete': 'Delete', 'save': 'Save',
-        'cancel': 'Cancel', 'search': 'Search...', 'filter': 'Filter', 'export': 'Export CSV',
-        'amount': 'Amount', 'description': 'Description', 'type': 'Type', 'due': 'Due',
-        'paid': 'Paid', 'total_due': 'Total Due', 'total_paid': 'Total Paid',
-        'outstanding': 'Outstanding', 'copy': 'Copy', 'call': 'Call', 'sms_on': 'SMS ON',
-        'sms_off': 'SMS OFF', 'send_sms': 'Send SMS', 'backup': 'Backup',
-        'language': 'Language', 'english': 'English', 'bangla': 'Bangla',
-        'update': 'Update', 'leave_blank': 'leave blank', 'new_username': 'New Username',
+        'welcome': 'Welcome!', 'invalid_credentials': 'Invalid credentials.',
+        'logged_out': 'Logged out.', 'add_party': 'Add Party', 'edit': 'Edit',
+        'delete': 'Delete', 'save': 'Save', 'cancel': 'Cancel', 'search': 'Search...',
+        'filter': 'Filter', 'export': 'Export CSV', 'amount': 'Amount',
+        'description': 'Description', 'type': 'Type', 'due': 'Due', 'paid': 'Paid',
+        'total_due': 'Total Due', 'total_paid': 'Total Paid', 'outstanding': 'Outstanding',
+        'copy': 'Copy', 'call': 'Call', 'sms_on': 'SMS ON', 'sms_off': 'SMS OFF',
+        'send_sms': 'Send SMS', 'backup': 'Backup', 'language': 'Language',
+        'english': 'English', 'bangla': 'Bangla', 'update': 'Update',
+        'leave_blank': 'leave blank', 'new_username': 'New Username',
         'new_password': 'New Password', 'confirm_password': 'Confirm Password',
         'current_password': 'Current Password', 'change_profile': 'Change Profile',
-        'download_backup': 'Download Backup', 'backup_desc': 'Download database and uploaded files as ZIP.',
+        'download_backup': 'Download Backup', 'backup_desc': 'Download all data as CSV files.',
         'select_language': 'Select Language',
         'all': 'All', 'has_dues': 'Has dues', 'cleared': 'Cleared', 'name': 'Name',
         'phone': 'Phone', 'vehicle': 'Vehicle', 'balance': 'Balance', 'action': 'Action',
@@ -229,10 +253,6 @@ translations = {
         'no_parties': 'No customers found.',
         'add_new_customer': 'Add New Customer',
         'edit_customer': 'Edit Customer',
-        'customer_details': 'Customer Details',
-        'personal_info': 'Personal Info',
-        'vehicle_info': 'Vehicle Info',
-        'notes': 'Notes',
         'profile_picture': 'Profile Picture',
         'nid_front': 'NID Front',
         'nid_back': 'NID Back',
@@ -251,6 +271,20 @@ translations = {
         'prev': 'Prev',
         'next': 'Next',
         'page': 'Page',
+        'add_moderator': 'Add Moderator',
+        'create': 'Create',
+        'permissions': 'Permissions',
+        'manage_users': 'Manage Users',
+        'manage_transactions': 'Manage Transactions',
+        'manage_settings': 'Manage Settings',
+        'export_data': 'Export Data',
+        'delete_data': 'Delete Data',
+        'confirm_delete': 'Are you sure?',
+        'disabled': 'Disabled',
+        'created': 'Created',
+        'last_login': 'Last login',
+        'add_transaction': 'Add Transaction',
+        'payment_method': 'Payment Method',
     },
     'bn': {
         'home': 'হোম', 'transactions': 'লেনদেন', 'parties': 'পার্টি',
@@ -258,21 +292,21 @@ translations = {
         'admins': 'অ্যাডমিন', 'broadcast_sms': 'সবাইকে SMS', 'settings': 'সেটিংস',
         'logout': 'সাইন আউট', 'bills': 'বিল', 'more': 'আরও',
         'sign_in': 'সাইন ইন', 'username': 'ইউজারনেম', 'password': 'পাসওয়ার্ড',
-        'default_credentials': 'ডিফল্ট: admin / admin123', 'welcome': 'স্বাগতম!',
-        'invalid_credentials': 'ভুল তথ্য।', 'logged_out': 'সাইন আউট হয়েছে।',
-        'add_party': 'পার্টি যোগ করুন', 'edit': 'সম্পাদনা', 'delete': 'মুছুন',
-        'save': 'সংরক্ষণ', 'cancel': 'বাতিল', 'search': 'খুঁজুন...',
-        'filter': 'ফিল্টার', 'export': 'CSV এক্সপোর্ট', 'amount': 'পরিমাণ',
-        'description': 'বিবরণ', 'type': 'ধরন', 'due': 'বাকি', 'paid': 'পরিশোধ',
-        'total_due': 'মোট বাকি', 'total_paid': 'মোট পরিশোধ', 'outstanding': 'বকেয়া',
-        'copy': 'কপি', 'call': 'কল', 'sms_on': 'SMS চালু', 'sms_off': 'SMS বন্ধ',
-        'send_sms': 'SMS পাঠান', 'backup': 'ব্যাকআপ', 'language': 'ভাষা',
-        'english': 'ইংরেজি', 'bangla': 'বাংলা', 'update': 'আপডেট',
-        'leave_blank': 'খালি রাখুন', 'new_username': 'নতুন ইউজারনেম',
-        'new_password': 'নতুন পাসওয়ার্ড', 'confirm_password': 'পাসওয়ার্ড নিশ্চিত করুন',
+        'welcome': 'স্বাগতম!', 'invalid_credentials': 'ভুল তথ্য।',
+        'logged_out': 'সাইন আউট হয়েছে।', 'add_party': 'পার্টি যোগ করুন',
+        'edit': 'সম্পাদনা', 'delete': 'মুছুন', 'save': 'সংরক্ষণ', 'cancel': 'বাতিল',
+        'search': 'খুঁজুন...', 'filter': 'ফিল্টার', 'export': 'CSV এক্সপোর্ট',
+        'amount': 'পরিমাণ', 'description': 'বিবরণ', 'type': 'ধরন', 'due': 'বাকি',
+        'paid': 'পরিশোধ', 'total_due': 'মোট বাকি', 'total_paid': 'মোট পরিশোধ',
+        'outstanding': 'বকেয়া', 'copy': 'কপি', 'call': 'কল',
+        'sms_on': 'SMS চালু', 'sms_off': 'SMS বন্ধ', 'send_sms': 'SMS পাঠান',
+        'backup': 'ব্যাকআপ', 'language': 'ভাষা', 'english': 'ইংরেজি', 'bangla': 'বাংলা',
+        'update': 'আপডেট', 'leave_blank': 'খালি রাখুন',
+        'new_username': 'নতুন ইউজারনেম', 'new_password': 'নতুন পাসওয়ার্ড',
+        'confirm_password': 'পাসওয়ার্ড নিশ্চিত করুন',
         'current_password': 'বর্তমান পাসওয়ার্ড', 'change_profile': 'প্রোফাইল পরিবর্তন',
         'download_backup': 'ব্যাকআপ ডাউনলোড',
-        'backup_desc': 'ডাটাবেজ ও আপলোড করা ফাইল জিপ হিসেবে ডাউনলোড করুন।',
+        'backup_desc': 'সকল ডাটা CSV ফাইল হিসেবে ডাউনলোড করুন।',
         'select_language': 'ভাষা নির্বাচন করুন',
         'all': 'সব', 'has_dues': 'বাকি আছে', 'cleared': 'পরিশোধিত',
         'name': 'নাম', 'phone': 'ফোন', 'vehicle': 'যানবাহন', 'balance': 'ব্যালেন্স',
@@ -283,10 +317,6 @@ translations = {
         'no_parties': 'কোনো গ্রাহক পাওয়া যায়নি।',
         'add_new_customer': 'নতুন গ্রাহক যোগ করুন',
         'edit_customer': 'গ্রাহক সম্পাদনা',
-        'customer_details': 'গ্রাহকের বিবরণ',
-        'personal_info': 'ব্যক্তিগত তথ্য',
-        'vehicle_info': 'যানবাহনের তথ্য',
-        'notes': 'নোট',
         'profile_picture': 'প্রোফাইল ছবি',
         'nid_front': 'এনআইডি সামনে',
         'nid_back': 'এনআইডি পেছনে',
@@ -305,6 +335,20 @@ translations = {
         'prev': 'পূর্ববর্তী',
         'next': 'পরবর্তী',
         'page': 'পৃষ্ঠা',
+        'add_moderator': 'মডারেটর যোগ করুন',
+        'create': 'তৈরি করুন',
+        'permissions': 'অনুমতি',
+        'manage_users': 'ব্যবহারকারী ব্যবস্থাপনা',
+        'manage_transactions': 'লেনদেন ব্যবস্থাপনা',
+        'manage_settings': 'সেটিংস ব্যবস্থাপনা',
+        'export_data': 'ডাটা এক্সপোর্ট',
+        'delete_data': 'ডাটা মুছুন',
+        'confirm_delete': 'আপনি কি নিশ্চিত?',
+        'disabled': 'নিষ্ক্রিয়',
+        'created': 'তৈরি করা হয়েছে',
+        'last_login': 'শেষ লগইন',
+        'add_transaction': 'লেনদেন যোগ করুন',
+        'payment_method': 'পেমেন্ট পদ্ধতি',
     }
 }
 
@@ -332,7 +376,8 @@ with app.app_context():
         db.session.add(admin)
         db.session.commit()
 
-# ---------- Routes ----------
+# ========== ROUTES ==========
+
 @app.route('/')
 def index():
     return redirect(url_for('dashboard') if 'admin_id' in session else url_for('login'))
@@ -427,12 +472,12 @@ def add_party():
                 vehicle_model=request.form.get('vehicle_model', '').strip(),
                 notes=request.form.get('notes', '').strip()
             )
-            for field, subdir in [('profile_pic', 'profiles'), ('nid_front', 'nid'), ('nid_back', 'nid')]:
+            for field in ['profile_pic', 'nid_front', 'nid_back']:
                 file = request.files.get(field)
                 if file and file.filename and allowed_file(file.filename):
-                    fname = secure_filename(f"{uuid.uuid4().hex}_{file.filename}")
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], subdir, fname))
-                    setattr(party, field, f'uploads/{subdir}/{fname}')
+                    url = upload_to_image_host(file)
+                    if url:
+                        setattr(party, field, url)
             db.session.add(party)
             db.session.commit()
             log_activity('Party created', party.name)
@@ -451,8 +496,8 @@ def party_detail(party_id):
         flash('Customer not found.', 'error')
         return redirect(url_for('parties'))
     trans = Transaction.query.filter_by(party_id=party_id).order_by(Transaction.date.desc()).all()
-    total_due = sum(t.amount for t in trans if t.transaction_type=='due')
-    total_paid = sum(t.amount for t in trans if t.transaction_type=='payment')
+    total_due = sum(tr.amount for tr in trans if tr.transaction_type=='due')
+    total_paid = sum(tr.amount for tr in trans if tr.transaction_type=='payment')
     return render_template('party_detail.html', party=party, transactions=trans,
                            total_due=total_due, total_paid=total_paid, current_due=total_due-total_paid)
 
@@ -476,15 +521,12 @@ def edit_party(party_id):
             party.vehicle_number = request.form.get('vehicle_number', '').strip()
             party.vehicle_model = request.form.get('vehicle_model', '').strip()
             party.notes = request.form.get('notes', '').strip()
-            for field, subdir in [('profile_pic', 'profiles'), ('nid_front', 'nid'), ('nid_back', 'nid')]:
+            for field in ['profile_pic', 'nid_front', 'nid_back']:
                 file = request.files.get(field)
                 if file and file.filename and allowed_file(file.filename):
-                    old = getattr(party, field)
-                    if old and os.path.exists(os.path.join('static', old)):
-                        os.remove(os.path.join('static', old))
-                    fname = secure_filename(f"{uuid.uuid4().hex}_{file.filename}")
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], subdir, fname))
-                    setattr(party, field, f'uploads/{subdir}/{fname}')
+                    url = upload_to_image_host(file)
+                    if url:
+                        setattr(party, field, url)
             db.session.commit()
             log_activity('Party updated', party.name)
             flash('Customer updated.', 'success')
@@ -502,17 +544,12 @@ def delete_party(party_id):
     if not party:
         flash('Customer not found.', 'error')
         return redirect(url_for('parties'))
-    for attr in ['profile_pic', 'nid_front', 'nid_back']:
-        path = getattr(party, attr)
-        if path and os.path.exists(os.path.join('static', path)):
-            os.remove(os.path.join('static', path))
     db.session.delete(party)
     db.session.commit()
     log_activity('Party deleted', party.name)
     flash('Customer deleted.', 'success')
     return redirect(url_for('parties'))
 
-# Transactions route (unchanged)
 @app.route('/transaction/add/<party_id>', methods=['POST'])
 @login_required
 def add_transaction(party_id):
@@ -557,7 +594,6 @@ def all_transactions():
     trans = query.order_by(Transaction.date.desc()).paginate(page=page, per_page=50)
     return render_template('transactions.html', transactions=trans, ttype=ttype)
 
-# Garage transactions (unchanged)
 @app.route('/garage-transactions')
 @login_required
 def garage_transactions():
@@ -592,7 +628,6 @@ def edit_garage_transaction(gt_id):
     flash('Expense updated.', 'success')
     return redirect(url_for('garage_transactions'))
 
-# Vehicle status (unchanged)
 @app.route('/vehicles')
 @login_required
 def vehicle_status():
@@ -656,7 +691,6 @@ def vehicle_history(party_id):
         prev_status = s.status
     return render_template('vehicle_history.html', party=party, statuses=statuses, total_on=total_on, total_off=total_off)
 
-# SMS
 @app.route('/broadcast-sms', methods=['GET', 'POST'])
 @login_required
 @admin_required
@@ -692,7 +726,6 @@ def toggle_sms(party_id):
     flash(f'SMS {"enabled" if party.sms_enabled else "disabled"} for {party.name}.', 'success')
     return redirect(request.referrer or url_for('parties'))
 
-# Admins
 @app.route('/admins')
 @login_required
 @admin_required
@@ -706,19 +739,15 @@ def manage_admins():
 def add_admin():
     username = request.form.get('username', '').strip()
     password = request.form.get('password', '')
-    
     if not username or not password:
         flash('Username and password are required.', 'error')
         return redirect(url_for('manage_admins'))
-    
     if len(password) < 4:
         flash('Password must be at least 4 characters.', 'error')
         return redirect(url_for('manage_admins'))
-    
     if Admin.query.filter_by(username=username).first():
         flash('Username already exists.', 'error')
         return redirect(url_for('manage_admins'))
-    
     perms = {
         'can_manage_users': request.form.get('perm_users') == 'on',
         'can_manage_transactions': request.form.get('perm_transactions') == 'on',
@@ -727,15 +756,9 @@ def add_admin():
         'can_export_data': request.form.get('perm_export') == 'on',
         'can_delete_data': request.form.get('perm_delete') == 'on'
     }
-    
     try:
-        admin = Admin(
-            username=username,
-            password=generate_password_hash(password),
-            role='moderator',
-            permissions=json.dumps(perms),
-            created_by=session['admin_id']
-        )
+        admin = Admin(username=username, password=generate_password_hash(password),
+                      role='moderator', permissions=json.dumps(perms), created_by=session['admin_id'])
         db.session.add(admin)
         db.session.commit()
         log_activity('Admin created', f'Moderator: {username}')
@@ -743,7 +766,6 @@ def add_admin():
     except Exception as e:
         db.session.rollback()
         flash(f'Error creating account: {str(e)}', 'error')
-    
     return redirect(url_for('manage_admins'))
 
 @app.route('/admin/<int:admin_id>/delete', methods=['POST'])
@@ -759,7 +781,6 @@ def delete_admin(admin_id):
     flash('Account deleted.', 'success')
     return redirect(url_for('manage_admins'))
 
-# Settings
 @app.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
@@ -792,25 +813,46 @@ def settings():
         return redirect(url_for('settings'))
     return render_template('settings.html', admin=admin, lang=admin.language)
 
-# Backup
 @app.route('/download-backup')
 @login_required
 def download_backup():
     mem_zip = io.BytesIO()
     with zipfile.ZipFile(mem_zip, 'w', zipfile.ZIP_DEFLATED) as zf:
-        db_path = 'garage.db'
-        if os.path.exists(db_path):
-            zf.write(db_path, 'garage.db')
-        uploads_dir = app.config['UPLOAD_FOLDER']
-        for root, dirs, files in os.walk(uploads_dir):
-            for file in files:
-                file_path = os.path.join(root, file)
-                arcname = os.path.relpath(file_path, start=uploads_dir)
-                zf.write(file_path, os.path.join('uploads', arcname))
+        # Parties CSV
+        si = StringIO()
+        cw = csv.writer(si)
+        cw.writerow(['ID','Name','Phone','Email','Vehicle','Total Due','Total Paid','Outstanding'])
+        for p in Party.query.all():
+            cw.writerow([p.id, p.name, p.phone, p.email, p.vehicle_number, p.total_due, p.total_paid, p.total_due-p.total_paid])
+        zf.writestr('parties.csv', si.getvalue())
+        
+        # Transactions CSV
+        si2 = StringIO()
+        cw2 = csv.writer(si2)
+        cw2.writerow(['ID','Party','Amount','Type','Description','Date','Bill Number'])
+        for tr in Transaction.query.all():
+            cw2.writerow([tr.id, tr.party.name if tr.party else '', tr.amount, tr.transaction_type, tr.description, tr.date.strftime('%Y-%m-%d %H:%M:%S'), tr.bill_number])
+        zf.writestr('transactions.csv', si2.getvalue())
+        
+        # Garage Expenses CSV
+        si3 = StringIO()
+        cw3 = csv.writer(si3)
+        cw3.writerow(['ID','Description','Amount','Date'])
+        for gt in GarageTransaction.query.all():
+            cw3.writerow([gt.id, gt.description, gt.amount, gt.date.strftime('%Y-%m-%d %H:%M:%S')])
+        zf.writestr('garage_expenses.csv', si3.getvalue())
+        
+        # Vehicle Statuses CSV
+        si4 = StringIO()
+        cw4 = csv.writer(si4)
+        cw4.writerow(['ID','Party','Vehicle','Status','Timestamp'])
+        for vs in VehicleStatus.query.all():
+            cw4.writerow([vs.id, vs.party.name if vs.party else '', vs.party.vehicle_number if vs.party else '', vs.status, vs.timestamp.strftime('%Y-%m-%d %H:%M:%S')])
+        zf.writestr('vehicle_statuses.csv', si4.getvalue())
+    
     mem_zip.seek(0)
     return send_file(mem_zip, download_name=f'garagepro_backup_{datetime.now().strftime("%Y%m%d_%H%M%S")}.zip', as_attachment=True)
 
-# Export
 @app.route('/export/parties')
 @login_required
 def export_parties():
@@ -820,8 +862,6 @@ def export_parties():
     for p in Party.query.all():
         cw.writerow([p.id, p.name, p.phone, p.email, p.vehicle_number, p.total_due, p.total_paid, p.total_due-p.total_paid])
     return Response(si.getvalue(), mimetype='text/csv', headers={'Content-Disposition': 'attachment;filename=parties.csv'})
-
-import os
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

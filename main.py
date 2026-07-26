@@ -16,7 +16,12 @@ from sqlalchemy import or_, func
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'garage-pro-secure-key-2025'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///garage.db'
+import os
+
+app.config["SQLALCHEMY_DATABASE_URI"] = (
+    os.environ.get("DATABASE_URL")
+    or "sqlite:///instance/garage.db"
+)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024

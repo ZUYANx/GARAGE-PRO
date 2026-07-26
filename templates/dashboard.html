@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}{{ t('home') }}{% endblock %}
+{% block content %}
+<style>
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border-radius: var(--radius); padding: 1rem 1.2rem; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; align-items: center; gap: 0.75rem; }
+    .stat-icon { width: 2.2rem; height: 2.2rem; border-radius: 0.6rem; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .stat-icon svg { width: 1.2rem; height: 1.2rem; }
+    .stat-content { flex: 1; min-width: 0; }
+    .stat-value { font-size: 1.5rem; font-weight: 700; line-height: 1.2; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.1rem; }
+    .quick-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+    .quick-action-btn { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 0.85rem; font-weight: 500; color: var(--text); text-decoration: none; transition: all var(--transition); }
+    .quick-action-btn:hover { background: var(--bg); border-color: var(--primary); color: var(--primary); }
+    .quick-action-btn svg { width: 1rem; height: 1rem; }
+    .dashboard-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; }
+    @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
+</style>
+
+<h2 style="margin-bottom: 1.2rem;">{{ t('home') }}</h2>
+
+<div class="quick-actions">
+    <a href="/party/add" class="quick-action-btn"><svg ...></svg> {{ t('add_party') }}</a>
+    <a href="/transactions" class="quick-action-btn"><svg ...></svg> {{ t('bills') }}</a>
+    <a href="/parties" class="quick-action-btn"><svg ...></svg> {{ t('parties') }}</a>
+    <a href="/export/parties" class="quick-action-btn"><svg ...></svg> {{ t('export') }}</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #e0f2fe; color: #0284c7;"><svg ...></svg></div>
+        <div class="stat-content"><div class="stat-value">{{ total_parties }}</div><div class="stat-label">{{ t('parties') }}</div></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fee2e2; color: #dc2626;"><svg ...></svg></div>
+        <div class="stat-content"><div class="stat-value" style="color:var(--danger);">Tk {{ "%.0f"|format(total_outstanding) }}</div><div class="stat-label">{{ t('outstanding') }}</div></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #d1fae5; color: #059669;"><svg ...></svg></div>
+        <div class="stat-content"><div class="stat-value" style="color:var(--primary);">Tk {{ "%.0f"|format(month_collections) }}</div><div class="stat-label">{{ t('total_paid') }} ({{ t('month') }})</div></div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon" style="background: #fef3c7; color: #d97706;"><svg ...></svg></div>
+        <div class="stat-content"><div class="stat-value">Tk {{ "%.0f"|format(today_collections) }}</div><div class="stat-label">{{ t('today') }}</div></div>
+    </div>
+</div>
+
+<div class="dashboard-grid">
+    <div>
+        <div class="card" style="margin-bottom:1.5rem;">
+            <h3 style="margin-bottom:1rem;">{{ t('recent_transactions') }}</h3>
+            {% if recent_transactions %}
+            <table>...</table>
+            {% else %}<p class="text-muted">{{ t('no_transactions') }}</p>{% endif %}
+        </div>
+        <div class="card">...</div>
+    </div>
+    <div>...</div>
+</div>
+{% endblock %}

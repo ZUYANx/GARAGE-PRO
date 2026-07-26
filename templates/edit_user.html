@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Edit User{% endblock %}
+{% block content %}
+<h2>Edit: {{ user.first_name }} {{ user.last_name or '' }}</h2>
+<div class="card" style="max-width:800px;">
+    <form method="POST" enctype="multipart/form-data">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group"><label class="form-label">First Name</label><input type="text" name="first_name" class="form-input" value="{{ user.first_name }}" required></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-input" value="{{ user.last_name or '' }}"></div>
+            <div class="form-group"><label class="form-label">Phone</label><input type="tel" name="phone" class="form-input" value="{{ user.phone }}" required></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-input" value="{{ user.email or '' }}"></div>
+            <div class="form-group" style="grid-column:span 2;"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="2">{{ user.address or '' }}</textarea></div>
+            <div class="form-group"><label class="form-label">Vehicle Number</label><input type="text" name="vehicle_number" class="form-input" value="{{ user.vehicle_number or '' }}"></div>
+            <div class="form-group"><label class="form-label">Vehicle Model</label><input type="text" name="vehicle_model" class="form-input" value="{{ user.vehicle_model or '' }}"></div>
+            <div class="form-group"><label class="form-label">Profile Pic</label>{% if user.profile_pic %}<br><img src="/static/{{ user.profile_pic }}" style="max-width:100px; margin-bottom:5px;">{% endif %}<input type="file" name="profile_pic" class="form-input" accept="image/*"><small>Leave empty to keep current</small></div>
+            <div class="form-group"><label class="form-label">NID Front</label>{% if user.nid_front %}<br><img src="/static/{{ user.nid_front }}" style="max-width:100px; margin-bottom:5px;">{% endif %}<input type="file" name="nid_front" class="form-input" accept="image/*"></div>
+            <div class="form-group"><label class="form-label">NID Back</label>{% if user.nid_back %}<br><img src="/static/{{ user.nid_back }}" style="max-width:100px; margin-bottom:5px;">{% endif %}<input type="file" name="nid_back" class="form-input" accept="image/*"></div>
+            <div class="form-group" style="grid-column:span 2;"><label class="form-label">Notes</label><textarea name="notes" class="form-input" rows="2">{{ user.notes or '' }}</textarea></div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+            <a href="/user/{{ user.id }}" class="btn">Cancel</a>
+            <button type="submit" class="btn btn-primary">Update</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

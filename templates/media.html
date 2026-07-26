@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Media{% endblock %}
+{% block content %}
+<h2>Media</h2>
+<form method="POST" action="/media/upload" enctype="multipart/form-data" style="margin-bottom:20px; display:flex; gap:10px; align-items:center;">
+    <input type="file" name="file" class="form-input" required>
+    <input type="text" name="description" placeholder="Description" class="form-input" style="width:200px;">
+    <select name="category" class="form-select" style="width:auto;">
+        <option value="general">General</option>
+        <option value="invoice">Invoice</option>
+        <option value="vehicle">Vehicle</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+
+{% if media_files %}
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px,1fr)); gap:16px;">
+    {% for m in media_files %}
+    <div class="card" style="padding:12px;">
+        {% if m.file_type in ['jpg','jpeg','png','gif'] %}
+        <img src="/static/uploads/media/{{ m.filename }}" style="width:100%; height:140px; object-fit:cover; border-radius:4px;">
+        {% else %}
+        <div style="height:140px; background:var(--gray-100); display:flex; align-items:center; justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/></svg>
+        </div>
+        {% endif %}
+        <div style="margin-top:8px; font-size:13px;">{{ m.original_name }}</div>
+        <div class="text-gray" style="font-size:11px;">{{ (m.file_size/1024)|round(1) }} KB &middot; {{ m.upload_date.strftime('%d %b') }}</div>
+        <div style="display:flex; gap:6px; margin-top:8px;">
+            <a href="/static/uploads/media/{{ m.filename }}" download class="btn btn-sm">Download</a>
+            <form method="POST" action="/media/{{ m.id }}/delete"><button type="submit" class="btn btn-sm btn-danger">Delete</button></form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}<p class="text-gray">No files uploaded.</p>{% endif %}
+{% endblock %}

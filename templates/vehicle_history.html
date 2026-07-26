@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ t('history') }} - {{ party.name }}{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1rem;">{{ t('history') }}: {{ party.vehicle_number }} ({{ party.name }})</h2>
+
+<div class="card" style="margin-bottom:1.5rem;">
+    <div style="display:flex; gap:2rem;">
+        <div><strong>{{ t('total_on_time') }}:</strong> {{ total_on }}</div>
+        <div><strong>{{ t('total_off_time') }}:</strong> {{ total_off }}</div>
+    </div>
+</div>
+
+<div class="card" style="padding:1rem;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+                <tr style="background:var(--bg); color:var(--text-secondary); font-weight:600;">
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('date_time') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('status') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('duration') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set ns = namespace(prev_time=None, prev_status=None) %}
+                {% for s in statuses %}
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.55rem 0.8rem;">{{ s.timestamp.strftime('%d %b %Y %I:%M %p') }}</td>
+                    <td style="padding:0.55rem 0.8rem;">
+                        <span class="badge {{ 'badge-green' if s.status=='ON' else 'badge-red' }}">{{ t('on') if s.status=='ON' else t('off') }}</span>
+                    </td>
+                    <td style="padding:0.55rem 0.8rem;">
+                        {% if ns.prev_time and ns.prev_status %}
+                            {% set diff = s.timestamp - ns.prev_time %}
+                            {{ diff }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% set ns.prev_time = s.timestamp %}
+                {% set ns.prev_status = s.status %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

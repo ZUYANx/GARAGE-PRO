@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ user.first_name }}{% endblock %}
+{% block content %}
+<div class="card" style="margin-bottom:20px;">
+    <div style="display:flex; gap:20px; align-items:center; flex-wrap:wrap;">
+        {% if user.profile_pic %}<img src="/static/{{ user.profile_pic }}" style="width:80px; height:80px; border-radius:50%; object-fit:cover;">{% endif %}
+        <div>
+            <h2>{{ user.first_name }} {{ user.last_name or '' }}</h2>
+            <p>{{ user.phone }} &middot; <span class="font-mono">{{ user.id }}</span></p>
+            {% if user.vehicle_number %}<p>Vehicle: {{ user.vehicle_number }} {{ user.vehicle_model or '' }}</p>{% endif %}
+        </div>
+        <div style="margin-left:auto; display:flex; gap:8px;">
+            <a href="/user/{{ user.id }}/edit" class="btn">Edit</a>
+            <button onclick="document.getElementById('txnModal').style.display='flex'" class="btn btn-primary">+ Transaction</button>
+        </div>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:20px;">
+    <div class="card"><div style="font-size:24px; color:var(--red);">₹{{ "%.2f"|format(total_duo) }}</div><div class="text-gray">Total Due</div></div>
+    <div class="card"><div style="font-size:24px; color:var(--green);">₹{{ "%.2f"|format(total_paid) }}</div><div class="text-gray">Total Paid</div></div>
+    <div class="card"><div style="font-size:24px; color:{{ '#ea4335' if current_duo>0 else '#0f9d58' }};">₹{{ "%.2f"|format(current_duo) }}</div><div class="text-gray">Outstanding</div></div>
+</div>
+
+{% if user.nid_front or user.nid_back %}
+<div class="card" style="margin-bottom:20px;">
+    <h3>Documents</h3>
+    <div style="display:flex; gap:20px;">
+        {% if user.nid_front %}<div><img src="/static/{{ user.nid_front }}" style="max-width:200px; border:1px solid #ddd; border-radius:4px;"></div>{% endif %}
+        {% if user.nid_back %}<div><img src="/static/{{ user.nid_back }}" style="max-width:200px; border:1px solid #ddd; border-radius:4px;"></div>{% endif %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Transactions</h3>
+    {% if transactions %}
+    <div class="table-responsive">
+        <table>
+            <thead><tr><th>Date</th><th>Type</th><th>Bill</th><th>Amount</th><th>Desc</th></tr></thead>
+            <tbody>
+            {% for t in transactions %}
+            <tr>
+                <td>{{ t.date.strftime('%d %b %Y %H:%M') }}</td>
+                <td><span class="badge {{ 'badge-red' if t.transaction_type=='duo' else 'badge-green' }}">{{ 'Due' if t.transaction_type=='duo' else 'Paid' }}</span></td>
+                <td class="font-mono">{{ t.bill_number }}</td>
+                <td class="text-right {{ 'text-red' if t.transaction_type=='duo' else 'text-green' }}">{{ '-' if t.transaction_type=='duo' else '+' }}₹{{ "%.2f"|format(t.amount) }}</td>
+                <td>{{ t.description or '-' }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}<p class="text-gray">No transactions.</p>{% endif %}
+</div>
+
+<!-- Transaction Modal -->
+<div id="txnModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:999; align-items:center; justify-content:center;" onclick="if(event.target===this) this.style.display='none'">
+    <div class="card" style="max-width:400px; width:90%;" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; margin-bottom:16px;">
+            <h3>Add Transaction</h3>
+            <button onclick="document.getElementById('txnModal').style.display='none'" style="background:none; border:none; font-size:20px; cursor:pointer;">&times;</button>
+        </div>
+        <form method="POST" action="/transaction/add/{{ user.id }}">
+            <div class="form-group"><label class="form-label">Type</label><select name="transaction_type" class="form-select"><option value="duo">Due</option><option value="paid">Payment</option></select></div>
+            <div class="form-group"><label class="form-label">Amount</label><input type="number" name="amount" class="form-input" step="0.01" required></div>
+            <div class="form-group"><label class="form-label">Payment Method</label><select name="payment_method" class="form-select"><option value="cash">Cash</option><option value="card">Card</option><option value="upi">UPI</option></select></div>
+            <div class="form-group"><label class="form-label">Description</label><input type="text" name="description" class="form-input"></div>
+            <button type="submit" class="btn btn-primary" style="width:100%;">Save</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

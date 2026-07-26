@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{{ t('vehicle_status') }}{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1rem;">{{ t('vehicle_status') }}</h2>
+
+<form method="GET" style="display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+    <input type="text" name="q" value="{{ q }}" placeholder="{{ t('search') }}" class="form-input" style="flex:1; min-width:200px;">
+    <select name="status" class="form-select" style="width:auto;">
+        <option value="all" {% if filter_status=='all' %}selected{% endif %}>{{ t('all') }}</option>
+        <option value="on" {% if filter_status=='on' %}selected{% endif %}>{{ t('running') }}</option>
+        <option value="off" {% if filter_status=='off' %}selected{% endif %}>{{ t('stopped') }}</option>
+    </select>
+    <button type="submit" class="btn">{{ t('filter') }}</button>
+</form>
+
+{% if parties %}
+<div class="card" style="padding:1rem;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+                <tr style="background:var(--bg); color:var(--text-secondary); font-weight:600;">
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('vehicle') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('name') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('status') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:center;">SMS</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:center;">{{ t('action') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in parties %}
+                {% set latest = p.vehicle_statuses|sort(attribute='timestamp', reverse=True)|first %}
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.55rem 0.8rem;">{{ p.vehicle_number }}</td>
+                    <td style="padding:0.55rem 0.8rem;"><a href="/party/{{ p.id }}">{{ p.name }}</a></td>
+                    <td style="padding:0.55rem 0.8rem;">
+                        <span class="badge {{ 'badge-green' if latest and latest.status=='ON' else 'badge-red' }}">
+                            {{ t('on') if latest and latest.status=='ON' else t('off') if latest else t('unknown') }}
+                        </span>
+                    </td>
+                    <td style="padding:0.55rem 0.8rem; text-align:center;">
+                        <form method="POST" action="/party/{{ p.id }}/toggle-sms" style="display:inline;">
+                            <button type="submit" class="btn btn-sm" style="background:{{ '#d1fae5' if p.sms_enabled else '#fee2e2' }}; cursor:pointer;">
+                                {{ t('sms_on') if p.sms_enabled else t('sms_off') }}
+                            </button>
+                        </form>
+                    </td>
+                    <td style="padding:0.55rem 0.8rem; text-align:center;">
+                        <form method="POST" action="/vehicle/{{ p.id }}/status" style="display:inline;">
+                            <input type="hidden" name="status" value="ON">
+                            <button type="submit" class="btn btn-sm" style="background:#d1fae5; color:#065f46;">{{ t('on') }}</button>
+                        </form>
+                        <form method="POST" action="/vehicle/{{ p.id }}/status" style="display:inline;">
+                            <input type="hidden" name="status" value="OFF">
+                            <button type="submit" class="btn btn-sm" style="background:#fee2e2; color:#991b1b;">{{ t('off') }}</button>
+                        </form>
+                        <a href="/vehicle/{{ p.id }}/history" class="btn btn-sm">{{ t('history') }}</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:2rem; color:var(--text-muted);">No vehicles registered.</div>
+{% endif %}
+{% endblock %}

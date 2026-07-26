@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}{{ t('admins') }}{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1rem;">{{ t('admins') }}</h2>
+
+<button onclick="openAddModal()" class="btn btn-primary" style="margin-bottom:1rem;">+ Add Moderator</button>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px,1fr)); gap:1rem;">
+    {% for a in admins %}
+    <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div>
+                <strong>{{ a.username }}</strong>
+                <span class="badge {{ 'badge-green' if a.role=='admin' else 'badge-blue' }}">{{ a.role }}</span>
+                {% if not a.is_active %}<span class="badge badge-red">Disabled</span>{% endif %}
+            </div>
+            {% if a.id != session.get('admin_id') and (permissions.get('can_delete_data') or permissions.get('all')) %}
+            <form method="POST" action="/admin/{{ a.id }}/delete" onsubmit="return confirm('Delete this account?')">
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+            </form>
+            {% endif %}
+        </div>
+        <div class="text-muted" style="font-size:0.8rem; margin-top:0.5rem;">
+            Created: {{ a.created_at.strftime('%d %b %Y') }}
+        </div>
+        {% if a.last_login %}
+        <div class="text-muted" style="font-size:0.8rem;">
+            Last login: {{ a.last_login.strftime('%d %b %Y %I:%M %p') }}
+        </div>
+        {% endif %}
+        {% if a.role == 'moderator' and a.permissions %}
+        <div style="margin-top:0.5rem;">
+            {% set perms = a.permissions|string %}
+            <small style="color:var(--text-muted);">
+                Permissions: 
+                {% if 'can_manage_users' in perms and '"can_manage_users": true' in perms|lower %}Users {% endif %}
+                {% if 'can_manage_transactions' in perms and '"can_manage_transactions": true' in perms|lower %}Transactions {% endif %}
+                {% if 'can_manage_settings' in perms and '"can_manage_settings": true' in perms|lower %}Settings {% endif %}
+                {% if 'can_export_data' in perms and '"can_export_data": true' in perms|lower %}Export {% endif %}
+                {% if 'can_delete_data' in perms and '"can_delete_data": true' in perms|lower %}Delete {% endif %}
+            </small>
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Add Moderator Modal -->
+<div id="addModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:200; align-items:center; justify-content:center;">
+    <div style="background:var(--surface); border-radius:var(--radius); padding:1.5rem; max-width:450px; width:90%; box-shadow:var(--shadow-md);" onclick="event.stopPropagation()">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+            <h3 style="margin:0;">Add Moderator</h3>
+            <button onclick="closeAddModal()" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:var(--text-muted);">&times;</button>
+        </div>
+        <form method="POST" action="/admin/add" onsubmit="return validateForm()">
+            <div class="form-group">
+                <label class="form-label">Username *</label>
+                <input type="text" name="username" id="modUsername" class="form-input" required placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password *</label>
+                <input type="password" name="password" id="modPassword" class="form-input" required placeholder="Enter password" minlength="4">
+            </div>
+            <input type="hidden" name="role" value="moderator">
+            
+            <div class="form-group">
+                <label class="form-label">Permissions</label>
+                <div style="display:grid; gap:0.5rem;">
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" name="perm_users" checked> Manage Users
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" name="perm_transactions" checked> Manage Transactions
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" name="perm_media"> Manage Media
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" name="perm_settings"> Manage Settings
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" name="perm_export"> Export Data
+                    </label>
+                    <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+                        <input type="checkbox" name="perm_delete"> Delete Data
+                    </label>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width:100%;">Create Moderator</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function openAddModal() {
+    document.getElementById('addModal').style.display = 'flex';
+}
+
+function closeAddModal() {
+    document.getElementById('addModal').style.display = 'none';
+}
+
+function validateForm() {
+    const username = document.getElementById('modUsername').value.trim();
+    const password = document.getElementById('modPassword').value;
+    
+    if (!username) {
+        alert('Please enter a username.');
+        return false;
+    }
+    if (!password || password.length < 4) {
+        alert('Password must be at least 4 characters.');
+        return false;
+    }
+    return true;
+}
+
+// Close modal when clicking outside
+document.getElementById('addModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAddModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAddModal();
+    }
+});
+</script>
+{% endblock %}

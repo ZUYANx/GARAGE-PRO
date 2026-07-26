@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+    <h2>Users</h2>
+    <a href="/user/add" class="btn btn-primary">+ New User</a>
+</div>
+
+<form method="GET" style="display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;">
+    <input type="text" name="q" value="{{ q }}" placeholder="Search..." class="form-input" style="flex:1; min-width:200px;">
+    <select name="filter" class="form-select" style="width:auto;">
+        <option value="all" {% if filter_type=='all' %}selected{% endif %}>All</option>
+        <option value="duo" {% if filter_type=='duo' %}selected{% endif %}>Has dues</option>
+        <option value="paid" {% if filter_type=='paid' %}selected{% endif %}>Cleared</option>
+    </select>
+    <select name="sort" class="form-select" style="width:auto;">
+        <option value="name" {% if sort=='name' %}selected{% endif %}>Name</option>
+        <option value="duo_desc" {% if sort=='duo_desc' %}selected{% endif %}>Highest due</option>
+        <option value="recent" {% if sort=='recent' %}selected{% endif %}>Recent</option>
+    </select>
+    <button type="submit" class="btn">Apply</button>
+</form>
+
+{% if users %}
+<div class="table-responsive">
+    <table>
+        <thead>
+            <tr><th>Name</th><th>Phone</th><th>Vehicle</th><th>Due</th><th>Paid</th><th>Balance</th><th></th></tr>
+        </thead>
+        <tbody>
+        {% for u in users %}
+        <tr>
+            <td><a href="/user/{{ u.id }}">{{ u.first_name }} {{ u.last_name or '' }}</a><br><span class="font-mono text-gray">{{ u.id }}</span></td>
+            <td>{{ u.phone }}</td>
+            <td>{{ u.vehicle_number or '-' }}</td>
+            <td class="text-red">₹{{ "%.0f"|format(u.total_duo) }}</td>
+            <td class="text-green">₹{{ "%.0f"|format(u.total_paid) }}</td>
+            <td class="{{ 'text-red' if (u.total_duo - u.total_paid) > 0 else 'text-green' }}">₹{{ "%.0f"|format(u.total_duo - u.total_paid) }}</td>
+            <td>
+                <a href="/user/{{ u.id }}/edit" class="btn btn-sm">Edit</a>
+                <form method="POST" action="/user/{{ u.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete user?')">
+                    <button type="submit" class="btn btn-sm btn-danger">Del</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-gray">No users found.</p>
+{% endif %}
+{% endblock %}

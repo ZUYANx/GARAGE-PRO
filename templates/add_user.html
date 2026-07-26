@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Add User{% endblock %}
+{% block content %}
+<h2>Add New Customer</h2>
+<div class="card" style="max-width:800px;">
+    <form method="POST" enctype="multipart/form-data">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <div class="form-group"><label class="form-label">First Name *</label><input type="text" name="first_name" class="form-input" required></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Phone *</label><input type="tel" name="phone" class="form-input" required></div>
+            <div class="form-group"><label class="form-label">Email</label><input type="email" name="email" class="form-input"></div>
+            <div class="form-group" style="grid-column:span 2;"><label class="form-label">Address</label><textarea name="address" class="form-input" rows="2"></textarea></div>
+            <div class="form-group"><label class="form-label">Vehicle Number</label><input type="text" name="vehicle_number" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Vehicle Model</label><input type="text" name="vehicle_model" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Profile Pic</label><input type="file" name="profile_pic" class="form-input" accept="image/*"></div>
+            <div class="form-group"><label class="form-label">NID Front</label><input type="file" name="nid_front" class="form-input" accept="image/*"></div>
+            <div class="form-group"><label class="form-label">NID Back</label><input type="file" name="nid_back" class="form-input" accept="image/*"></div>
+            <div class="form-group" style="grid-column:span 2;"><label class="form-label">Notes</label><textarea name="notes" class="form-input" rows="2"></textarea></div>
+        </div>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:16px;">
+            <a href="/users" class="btn">Cancel</a>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

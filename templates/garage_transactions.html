@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}{{ t('garage_expenses') }}{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1rem;">{{ t('garage_expenses') }}</h2>
+
+<div class="card" style="margin-bottom:1.5rem;">
+    <form method="POST" action="/garage-transaction/add" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+        <input type="text" name="description" class="form-input" placeholder="{{ t('description') }}" required style="flex:2;">
+        <input type="number" name="amount" class="form-input" placeholder="{{ t('amount') }}" step="0.01" required style="flex:1;">
+        <button type="submit" class="btn btn-primary">{{ t('expense_add') }}</button>
+    </form>
+</div>
+
+{% if transactions.items %}
+<div class="card" style="padding:1rem;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead>
+                <tr style="background:var(--bg); color:var(--text-secondary); font-weight:600;">
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('date_time') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('description') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:right;">{{ t('amount') }}</th>
+                    <th style="padding:0.6rem 0.8rem; text-align:center;">{{ t('action') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for gt in transactions.items %}
+                <tr style="border-bottom:1px solid var(--border);">
+                    <td style="padding:0.55rem 0.8rem; color:var(--text-secondary);">{{ gt.date.strftime('%d %b %Y %I:%M %p') }}</td>
+                    <td style="padding:0.55rem 0.8rem;">{{ gt.description }}</td>
+                    <td style="padding:0.55rem 0.8rem; text-align:right; font-weight:600; white-space:nowrap; color:var(--danger);">-Tk {{ "%.2f"|format(gt.amount) }}</td>
+                    <td style="padding:0.55rem 0.8rem; text-align:center;">
+                        <button onclick="editExpense({{ gt.id }}, '{{ gt.description }}', {{ gt.amount }})" class="btn btn-sm">{{ t('edit') }}</button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="display:flex; justify-content:center; gap:0.4rem; margin-top:1.25rem;">
+        {% if transactions.has_prev %}<a href="?page={{ transactions.prev_num }}" class="btn btn-sm">{{ t('prev') }}</a>{% endif %}
+        {% for p in transactions.iter_pages() %}{% if p %}<a href="?page={{ p }}" class="btn btn-sm {{ 'btn-primary' if p==transactions.page else '' }}">{{ p }}</a>{% else %}<span style="padding:0.3rem 0.5rem;">...</span>{% endif %}{% endfor %}
+        {% if transactions.has_next %}<a href="?page={{ transactions.next_num }}" class="btn btn-sm">{{ t('next') }}</a>{% endif %}
+    </div>
+</div>
+{% else %}
+<div class="card" style="text-align:center; padding:2rem; color:var(--text-muted);">{{ t('no_expenses') }}</div>
+{% endif %}
+
+<div id="editModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:100; align-items:center; justify-content:center;" onclick="if(event.target===this) this.style.display='none'">
+    <div style="background:var(--surface); border-radius:var(--radius); padding:1.5rem; max-width:400px; width:90%;" onclick="event.stopPropagation()">
+        <h3 style="margin-bottom:1rem;">{{ t('expense_edit') }}</h3>
+        <form method="POST" id="editForm">
+            <div class="form-group"><label class="form-label">{{ t('description') }}</label><input type="text" name="description" id="editDesc" class="form-input" required></div>
+            <div class="form-group"><label class="form-label">{{ t('amount') }}</label><input type="number" name="amount" id="editAmt" class="form-input" step="0.01" required></div>
+            <div style="display:flex; gap:0.5rem; justify-content:flex-end;">
+                <button type="button" class="btn" onclick="document.getElementById('editModal').style.display='none'">{{ t('cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ t('update') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function editExpense(id, desc, amt) {
+    document.getElementById('editForm').action = '/garage-transaction/'+id+'/edit';
+    document.getElementById('editDesc').value = desc;
+    document.getElementById('editAmt').value = amt;
+    document.getElementById('editModal').style.display = 'flex';
+}
+</script>
+{% endblock %}

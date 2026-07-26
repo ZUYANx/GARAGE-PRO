@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}{{ t('settings') }}{% endblock %}
+{% block content %}
+<h2>{{ t('settings') }}</h2>
+
+<div class="card" style="max-width:500px; margin-bottom:1.5rem;">
+    <h3>{{ t('change_profile') }}</h3>
+    <form method="POST">
+        <input type="hidden" name="action" value="change_profile">
+        <div class="form-group"><label class="form-label">{{ t('new_username') }}</label><input type="text" name="new_username" class="form-input" value="{{ admin.username }}"></div>
+        <div class="form-group"><label class="form-label">{{ t('new_password') }} ({{ t('leave_blank') }})</label><input type="password" name="new_password" class="form-input"></div>
+        <div class="form-group"><label class="form-label">{{ t('confirm_password') }}</label><input type="password" name="confirm_password" class="form-input"></div>
+        <div class="form-group"><label class="form-label">{{ t('current_password') }} *</label><input type="password" name="current_password" class="form-input" required></div>
+        <button type="submit" class="btn btn-primary">{{ t('update') }}</button>
+    </form>
+</div>
+
+<div class="card" style="max-width:500px; margin-bottom:1.5rem;">
+    <h3>{{ t('language') }}</h3>
+    <form method="POST">
+        <div class="form-group">
+            <label class="form-label">{{ t('select_language') }}</label>
+            <select name="language" class="form-select" onchange="this.form.submit()">
+                <option value="en" {% if lang=='en' %}selected{% endif %}>{{ t('english') }}</option>
+                <option value="bn" {% if lang=='bn' %}selected{% endif %}>{{ t('bangla') }}</option>
+            </select>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="max-width:500px;">
+    <h3>{{ t('backup') }}</h3>
+    <p class="text-muted">{{ t('backup_desc') }}</p>
+    <a href="/download-backup" class="btn btn-primary">{{ t('download_backup') }}</a>
+</div>
+{% endblock %}

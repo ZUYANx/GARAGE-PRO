@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}{% if party %}{{ t('edit_customer') }}{% else %}{{ t('add_new_customer') }}{% endif %}{% endblock %}
+{% block content %}
+<h2>{% if party %}{{ t('edit_customer') }}{% else %}{{ t('add_new_customer') }}{% endif %}</h2>
+<div class="card" style="max-width:800px;">
+    <form method="POST" enctype="multipart/form-data">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group"><label class="form-label">{{ t('name') }} *</label><input type="text" name="name" class="form-input" value="{{ party.name if party else '' }}" required></div>
+            <div class="form-group"><label class="form-label">{{ t('phone') }} *</label><input type="tel" name="phone" class="form-input" value="{{ party.phone if party else '' }}" required></div>
+            <div class="form-group"><label class="form-label">{{ t('email') }}</label><input type="email" name="email" class="form-input" value="{{ party.email if party else '' }}"></div>
+            <div class="form-group"><label class="form-label">{{ t('address') }}</label><textarea name="address" class="form-input" rows="2">{{ party.address if party else '' }}</textarea></div>
+            <div class="form-group"><label class="form-label">{{ t('vehicle_number') }}</label><input type="text" name="vehicle_number" class="form-input" value="{{ party.vehicle_number if party else '' }}"></div>
+            <div class="form-group"><label class="form-label">{{ t('vehicle_model') }}</label><input type="text" name="vehicle_model" class="form-input" value="{{ party.vehicle_model if party else '' }}"></div>
+            <div class="form-group"><label class="form-label">{{ t('profile_picture') }}</label>{% if party and party.profile_pic %}<img src="/static/{{ party.profile_pic }}" style="max-width:100px;">{% endif %}<input type="file" name="profile_pic" class="form-input" accept="image/*"></div>
+            <div class="form-group"><label class="form-label">{{ t('nid_front') }}</label>{% if party and party.nid_front %}<img src="/static/{{ party.nid_front }}" style="max-width:100px;">{% endif %}<input type="file" name="nid_front" class="form-input" accept="image/*"></div>
+            <div class="form-group"><label class="form-label">{{ t('nid_back') }}</label>{% if party and party.nid_back %}<img src="/static/{{ party.nid_back }}" style="max-width:100px;">{% endif %}<input type="file" name="nid_back" class="form-input" accept="image/*"></div>
+            <div class="form-group" style="grid-column:span 2;"><label class="form-label">{{ t('notes') }}</label><textarea name="notes" class="form-input" rows="2">{{ party.notes if party else '' }}</textarea></div>
+        </div>
+        <div style="display:flex; gap:0.5rem; justify-content:flex-end; margin-top:1.5rem;">
+            <a href="/parties" class="btn">{{ t('cancel') }}</a>
+            <button type="submit" class="btn btn-primary">{{ t('save') }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

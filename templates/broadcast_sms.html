@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}{{ t('broadcast_sms') }}{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1rem;">{{ t('broadcast_sms') }}</h2>
+<div class="card" style="max-width:600px;">
+    <form method="POST" action="/broadcast-sms">
+        <div class="form-group">
+            <label class="form-label">{{ t('message') }}</label>
+            <textarea name="message" class="form-input" rows="4" required placeholder="{{ t('type_message') }}"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">{{ t('send_to_all') }}</button>
+    </form>
+</div>
+<p class="text-muted" style="margin-top:1rem;">{{ t('simulated') }}</p>
+{% endblock %}

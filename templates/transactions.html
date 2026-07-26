@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}{{ t('transactions') }}{% endblock %}
+{% block content %}
+<h2 style="margin-bottom:1rem;">{{ t('transactions') }}</h2>
+<div style="display:flex; gap:0.5rem; margin-bottom:1.25rem;">
+    <a href="?type=all" class="btn {% if ttype == 'all' %}btn-primary{% endif %}">{{ t('all') }}</a>
+    <a href="?type=due" class="btn {% if ttype == 'due' %}btn-primary{% endif %}">{{ t('due') }}</a>
+    <a href="?type=payment" class="btn {% if ttype == 'payment' %}btn-primary{% endif %}">{{ t('paid') }}</a>
+</div>
+{% if transactions.items %}
+<div class="card" style="padding:1rem;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%; border-collapse:collapse; font-size:0.9rem;">
+            <thead><tr style="background:var(--bg); color:var(--text-secondary); font-weight:600;"><th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('name') }}</th><th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('date_time') }}</th><th style="padding:0.6rem 0.8rem; text-align:left;">Bill</th><th style="padding:0.6rem 0.8rem; text-align:left;">{{ t('type') }}</th><th style="padding:0.6rem 0.8rem; text-align:right;">{{ t('amount') }}</th></tr></thead>
+            <tbody>
+            {% for t in transactions.items %}
+            <tr style="border-bottom:1px solid var(--border);">
+                <td style="padding:0.55rem 0.8rem;"><a href="/party/{{ t.party_id }}" style="color:var(--text); font-weight:500;">{{ t.party.name }}</a></td>
+                <td style="padding:0.55rem 0.8rem; color:var(--text-secondary);">{{ t.date.strftime('%d %b %Y %I:%M %p') }}</td>
+                <td style="padding:0.55rem 0.8rem; font-family:monospace; font-size:0.85rem;">{{ t.bill_number }}</td>
+                <td style="padding:0.55rem 0.8rem;"><span class="badge {{ 'badge-red' if t.transaction_type=='due' else 'badge-green' }}">{{ t('due') if t.transaction_type=='due' else t('paid') }}</span></td>
+                <td style="padding:0.55rem 0.8rem; text-align:right; font-weight:600; white-space:nowrap; color:{{ '#dc2626' if t.transaction_type=='due' else '#059669' }};">{{ '-' if t.transaction_type=='due' else '+' }}Tk {{ "%.2f"|format(t.amount) }}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div style="display:flex; justify-content:center; gap:0.4rem; margin-top:1.25rem;">
+        {% if transactions.has_prev %}<a href="?page={{ transactions.prev_num }}&type={{ ttype }}" class="btn btn-sm">{{ t('prev') }}</a>{% endif %}
+        {% for p in transactions.iter_pages() %}{% if p %}<a href="?page={{ p }}&type={{ ttype }}" class="btn btn-sm {{ 'btn-primary' if p==transactions.page else '' }}">{{ p }}</a>{% else %}<span style="padding:0.3rem 0.5rem;">&hellip;</span>{% endif %}{% endfor %}
+        {% if transactions.has_next %}<a href="?page={{ transactions.next_num }}&type={{ ttype }}" class="btn btn-sm">{{ t('next') }}</a>{% endif %}
+    </div>
+</div>
+{% else %}<div class="card" style="text-align:center; padding:2rem; color:var(--text-muted);">{{ t('no_transactions') }}</div>{% endif %}
+{% endblock %}

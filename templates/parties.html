@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}{{ t('parties') }}{% endblock %}
+{% block content %}
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+    <h2>{{ t('parties') }}</h2>
+    <a href="/party/add" class="btn btn-primary">{{ t('add_party') }}</a>
+</div>
+<form method="GET" style="display:flex; gap:0.5rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+    <input type="text" name="q" value="{{ q }}" placeholder="{{ t('search') }}" class="form-input" style="flex:1; min-width:200px;">
+    <select name="filter" class="form-select" style="width:auto;">
+        <option value="all" {% if filter_type=='all' %}selected{% endif %}>{{ t('all') }}</option>
+        <option value="due" {% if filter_type=='due' %}selected{% endif %}>{{ t('has_dues') }}</option>
+        <option value="paid" {% if filter_type=='paid' %}selected{% endif %}>{{ t('cleared') }}</option>
+    </select>
+    <select name="sort" class="form-select" style="width:auto;">
+        <option value="name" {% if sort=='name' %}selected{% endif %}>{{ t('name') }}</option>
+        <option value="due_desc" {% if sort=='due_desc' %}selected{% endif %}>{{ t('highest_due') }}</option>
+        <option value="recent" {% if sort=='recent' %}selected{% endif %}>{{ t('recent') }}</option>
+    </select>
+    <button type="submit" class="btn">{{ t('filter') }}</button>
+    <a href="/export/parties" class="btn">{{ t('export') }}</a>
+</form>
+{% if parties %}
+<div style="overflow-x:auto;">
+    <table>
+        <thead><tr><th>{{ t('name') }}</th><th>{{ t('phone') }}</th><th>{{ t('vehicle') }}</th><th>{{ t('total_due') }}</th><th>{{ t('total_paid') }}</th><th>{{ t('balance') }}</th><th>{{ t('action') }}</th></tr></thead>
+        <tbody>
+        {% for p in parties %}
+        <tr>
+            <td><a href="/party/{{ p.id }}">{{ p.name }}</a></td>
+            <td>{{ p.phone }}</td>
+            <td>{{ p.vehicle_number or '-' }}</td>
+            <td class="text-red">Tk {{ "%.0f"|format(p.total_due) }}</td>
+            <td class="text-green">Tk {{ "%.0f"|format(p.total_paid) }}</td>
+            <td class="{{ 'text-red' if (p.total_due-p.total_paid)>0 else 'text-green' }}">Tk {{ "%.0f"|format(p.total_due-p.total_paid) }}</td>
+            <td>
+                <a href="/party/{{ p.id }}" class="btn btn-sm">{{ t('view') }}</a>
+                <a href="/party/{{ p.id }}/edit" class="btn btn-sm">{{ t('edit') }}</a>
+                {% if permissions.get('can_delete_data') or permissions.get('all') %}
+                <form method="POST" action="/party/{{ p.id }}/delete" style="display:inline;" onsubmit="return confirm('{{ t('confirm_delete') }}')">
+                    <button class="btn btn-sm btn-danger">{{ t('delete') }}</button>
+                </form>
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}<p class="text-muted">{{ t('no_parties') }}</p>{% endif %}
+{% endblock %}

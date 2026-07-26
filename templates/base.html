@@ -14,66 +14,162 @@
             --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
             --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
             --shadow-md: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
-            --radius: 12px; --radius-sm: 8px; --transition: 150ms ease;
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --radius: 12px; --radius-sm: 8px; --radius-lg: 16px;
+            --transition: 150ms ease;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
         body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height:1.5; -webkit-font-smoothing:antialiased; min-height:100vh; }
-        .header { background: var(--surface); border-bottom:1px solid var(--border); padding:0 1.5rem; height:4rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:50; box-shadow:var(--shadow-sm); }
+        a { color: var(--primary); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+
+        /* Header */
+        .header {
+            background: var(--surface); border-bottom:1px solid var(--border);
+            padding:0 1.5rem; height:4rem; display:flex; align-items:center;
+            justify-content:space-between; position:sticky; top:0; z-index:50;
+            box-shadow:var(--shadow-sm);
+        }
         .header-left { display:flex; align-items:center; gap:1rem; }
-        .menu-btn { background:none; border:none; cursor:pointer; padding:0.5rem; border-radius:var(--radius-sm); display:flex; align-items:center; }
+        .menu-btn {
+            background:none; border:none; cursor:pointer; padding:0.5rem;
+            border-radius:var(--radius-sm); display:flex; align-items:center;
+        }
         .menu-btn:hover { background:var(--bg); }
         .menu-btn svg { width:1.5rem; height:1.5rem; stroke:var(--text-secondary); }
         .brand { display:flex; align-items:center; gap:0.75rem; text-decoration:none; color:var(--text); font-weight:600; font-size:1.25rem; }
         .brand-icon { width:2rem; height:2rem; background:var(--primary); border-radius:0.5rem; display:flex; align-items:center; justify-content:center; }
         .brand-icon svg { width:1.2rem; height:1.2rem; fill:white; }
         .header-right { display:flex; align-items:center; gap:1rem; font-size:0.875rem; color:var(--text-secondary); }
-        .sidebar-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15,23,42,0.3); backdrop-filter:blur(2px); z-index:60; opacity:0; visibility:hidden; transition:all 0.3s; }
+
+        /* Sidebar overlay */
+        .sidebar-overlay {
+            position:fixed; top:0; left:0; width:100%; height:100%;
+            background:rgba(15,23,42,0.3); backdrop-filter:blur(2px);
+            z-index:60; opacity:0; visibility:hidden; transition:all 0.3s;
+        }
         .sidebar-overlay.active { opacity:1; visibility:visible; }
-        .sidebar { position:fixed; top:0; left:-18rem; width:18rem; height:100%; background:var(--surface); z-index:70; transition:left 0.3s; box-shadow:var(--shadow-md); display:flex; flex-direction:column; border-right:1px solid var(--border); }
+
+        /* Sidebar */
+        .sidebar {
+            position:fixed; top:0; left:-18rem; width:18rem; height:100%;
+            background:var(--surface); z-index:70; transition:left 0.3s;
+            box-shadow:var(--shadow-md); display:flex; flex-direction:column;
+            border-right:1px solid var(--border);
+        }
         .sidebar.active { left:0; }
-        .sidebar-header { padding:1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+        .sidebar-header {
+            padding:1.5rem; border-bottom:1px solid var(--border);
+            display:flex; align-items:center; justify-content:space-between;
+        }
         .sidebar-brand { display:flex; align-items:center; gap:0.75rem; font-weight:600; font-size:1.125rem; }
         .close-btn { background:none; border:none; cursor:pointer; padding:0.25rem; border-radius:var(--radius-sm); color:var(--text-muted); }
         .close-btn:hover { background:var(--bg); }
         .sidebar-nav { flex:1; padding:0.75rem 0; overflow-y:auto; }
-        .nav-item { display:flex; align-items:center; gap:0.875rem; padding:0.75rem 1.5rem; margin:0 0.5rem; border-radius:var(--radius-sm); color:var(--text-secondary); text-decoration:none; font-size:0.875rem; font-weight:500; transition:all var(--transition); }
+        .nav-item {
+            display:flex; align-items:center; gap:0.875rem; padding:0.75rem 1.5rem;
+            margin:0 0.5rem; border-radius:var(--radius-sm); color:var(--text-secondary);
+            text-decoration:none; font-size:0.875rem; font-weight:500; transition:all var(--transition);
+        }
         .nav-item:hover { background:var(--bg); color:var(--text); }
         .nav-item.active { background:var(--primary-light); color:var(--primary); font-weight:600; }
         .nav-item svg { width:1.25rem; height:1.25rem; flex-shrink:0; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
         .sidebar-footer { padding:1rem 1.5rem; border-top:1px solid var(--border); }
-        .logout-btn { display:flex; align-items:center; gap:0.5rem; width:100%; padding:0.625rem; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--surface); color:var(--danger); cursor:pointer; font-size:0.875rem; font-weight:500; justify-content:center; text-decoration:none; }
+        .logout-btn {
+            display:flex; align-items:center; gap:0.5rem; width:100%; padding:0.625rem;
+            border:1px solid var(--border); border-radius:var(--radius-sm);
+            background:var(--surface); color:var(--danger); cursor:pointer;
+            font-size:0.875rem; font-weight:500; justify-content:center; text-decoration:none;
+        }
         .logout-btn:hover { background:#fef2f2; }
+
+        /* Main content */
         .main-content { padding:1.5rem; max-width:1280px; margin:0 auto; min-height:calc(100vh - 4rem); }
-        .bottom-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:var(--surface); border-top:1px solid var(--border); z-index:50; padding:0.25rem 0; box-shadow:0 -1px 3px rgba(0,0,0,0.05); }
+
+        /* Bottom navigation (mobile) */
+        .bottom-nav {
+            display:none; position:fixed; bottom:0; left:0; right:0;
+            background:var(--surface); border-top:1px solid var(--border);
+            z-index:50; padding:0.25rem 0; box-shadow:0 -1px 3px rgba(0,0,0,0.05);
+        }
         .bottom-nav-inner { display:flex; justify-content:space-around; }
-        .bottom-nav a { display:flex; flex-direction:column; align-items:center; padding:0.5rem 0.75rem; color:var(--text-muted); text-decoration:none; font-size:0.625rem; font-weight:500; border-radius:var(--radius-sm); }
+        .bottom-nav a {
+            display:flex; flex-direction:column; align-items:center; padding:0.5rem 0.75rem;
+            color:var(--text-muted); text-decoration:none; font-size:0.625rem; font-weight:500;
+            border-radius:var(--radius-sm);
+        }
         .bottom-nav a.active { color:var(--primary); }
         .bottom-nav a svg { width:1.35rem; height:1.35rem; stroke:currentColor; fill:none; stroke-width:2; }
-        @media (min-width:1024px) { .sidebar { left:0; } .sidebar-overlay { display:none; } .main-content { margin-left:18rem; } .menu-btn { display:none; } }
-        @media (max-width:1023px) { .bottom-nav { display:block; } .main-content { padding-bottom:5rem; } .header-right { display:none; } }
-        .card { background:var(--surface); border-radius:var(--radius); padding:1.5rem; box-shadow:var(--shadow); border:1px solid var(--border); }
-        .btn { display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; border-radius:var(--radius-sm); font-size:0.875rem; font-weight:500; text-decoration:none; cursor:pointer; transition:all var(--transition); border:1px solid var(--border); background:var(--surface); color:var(--text); font-family:inherit; }
+
+        /* Responsive */
+        @media (min-width:1024px) {
+            .sidebar { left:0; }
+            .sidebar-overlay { display:none; }
+            .main-content { margin-left:18rem; }
+            .menu-btn { display:none; }
+        }
+        @media (max-width:1023px) {
+            .bottom-nav { display:block; }
+            .main-content { padding-bottom:5rem; }
+            .header-right { display:none; }
+        }
+
+        /* Common components */
+        .card {
+            background:var(--surface); border-radius:var(--radius);
+            padding:1.5rem; box-shadow:var(--shadow); border:1px solid var(--border);
+        }
+        .btn {
+            display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem;
+            border-radius:var(--radius-sm); font-size:0.875rem; font-weight:500;
+            text-decoration:none; cursor:pointer; transition:all var(--transition);
+            border:1px solid var(--border); background:var(--surface); color:var(--text);
+            font-family:inherit;
+        }
         .btn:hover { background:var(--bg); }
         .btn-primary { background:var(--primary); color:white; border-color:var(--primary); }
         .btn-primary:hover { background:var(--primary-dark); }
         .btn-danger { color:var(--danger); border-color:var(--danger); }
         .btn-danger:hover { background:#fef2f2; }
         .btn-sm { padding:0.375rem 0.75rem; font-size:0.8125rem; }
+
         .form-group { margin-bottom:1.25rem; }
         .form-label { display:block; margin-bottom:0.5rem; font-size:0.875rem; font-weight:500; }
-        .form-input, .form-select { width:100%; padding:0.625rem 0.875rem; border:1px solid var(--border); border-radius:var(--radius-sm); font-size:0.875rem; background:var(--surface); font-family:inherit; }
-        .form-input:focus, .form-select:focus { outline:none; border-color:var(--primary); box-shadow:0 0 0 3px rgba(5,150,105,0.1); }
+        .form-input, .form-select {
+            width:100%; padding:0.625rem 0.875rem; border:1px solid var(--border);
+            border-radius:var(--radius-sm); font-size:0.875rem; background:var(--surface);
+            font-family:inherit;
+        }
+        .form-input:focus, .form-select:focus {
+            outline:none; border-color:var(--primary);
+            box-shadow:0 0 0 3px rgba(5,150,105,0.1);
+        }
+
         table { width:100%; border-collapse:collapse; }
         th, td { padding:0.875rem 1rem; text-align:left; border-bottom:1px solid var(--border); font-size:0.875rem; }
         th { background:var(--bg); color:var(--text-secondary); font-weight:600; }
         tr:hover td { background:#f8fafc; }
-        .badge { display:inline-block; padding:0.125rem 0.625rem; border-radius:9999px; font-size:0.75rem; font-weight:600; }
+
+        .badge {
+            display:inline-block; padding:0.125rem 0.625rem; border-radius:9999px;
+            font-size:0.75rem; font-weight:600;
+        }
         .badge-red { background:#fef2f2; color:var(--danger); }
         .badge-green { background:#ecfdf5; color:var(--primary); }
-        .flash-msg { padding:0.75rem 1rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.875rem; display:flex; align-items:center; gap:0.5rem; animation:slideDown 0.3s; }
-        @keyframes slideDown { from { opacity:0; transform:translateY(-10px); } to { opacity:1; transform:translateY(0); } }
+        .badge-blue { background:#eff6ff; color:#2563eb; }
+
+        .flash-msg {
+            padding:0.75rem 1rem; border-radius:var(--radius-sm); margin-bottom:1rem;
+            font-size:0.875rem; display:flex; align-items:center; gap:0.5rem;
+            animation:slideDown 0.3s;
+        }
+        @keyframes slideDown {
+            from { opacity:0; transform:translateY(-10px); }
+            to { opacity:1; transform:translateY(0); }
+        }
         .flash-success { background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; }
         .flash-error { background:#fef2f2; color:#991b1b; border:1px solid #fecaca; }
+
         .text-right { text-align:right; }
         .text-red { color:var(--danger); }
         .text-green { color:var(--primary); }
@@ -82,30 +178,84 @@
     </style>
 </head>
 <body>
+    <!-- Header -->
     <header class="header">
         <div class="header-left">
-            <button class="menu-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
-            <a href="/dashboard" class="brand"><span class="brand-icon"><svg viewBox="0 0 24 24"><path d="M20 7h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 4h4v3h-4V4zm10 16H4V9h16v11z"/></svg></span>GaragePro</a>
-        </div>
-        <div class="header-right">{% if session.get('admin_username') %}{{ session.admin_username }}{% endif %}</div>
-    </header>
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-header"><div class="sidebar-brand"><span class="brand-icon"><svg viewBox="0 0 24 24"><path d="M20 7h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 4h4v3h-4V4zm10 16H4V9h16v11z"/></svg></span>GaragePro</div><button class="close-btn" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-        <nav class="sidebar-nav">
-            <a href="/dashboard" class="nav-item {% if request.endpoint=='dashboard' %}active{% endif %}"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> {{ t('home') }}</a>
-            <a href="/transactions" class="nav-item {% if request.endpoint=='all_transactions' %}active{% endif %}"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> {{ t('transactions') }}</a>
-            <a href="/parties" class="nav-item {% if request.endpoint in ['parties','party_detail','edit_party','add_party'] %}active{% endif %}"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> {{ t('parties') }}</a>
-            <a href="/garage-transactions" class="nav-item {% if request.endpoint=='garage_transactions' %}active{% endif %}"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg> {{ t('garage_expenses') }}</a>
-            <a href="/vehicles" class="nav-item {% if request.endpoint in ['vehicle_status','vehicle_history'] %}active{% endif %}"><svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg> {{ t('vehicle_status') }}</a>
-            {% if session.get('admin_role') == 'admin' %}
-            <a href="/admins" class="nav-item {% if request.endpoint=='manage_admins' %}active{% endif %}"><svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg> {{ t('admins') }}</a>
+            {% if current_admin %}
+            <button class="menu-btn" onclick="toggleSidebar()" aria-label="Menu">
+                <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
             {% endif %}
-            <a href="/broadcast-sms" class="nav-item {% if request.endpoint=='broadcast_sms' %}active{% endif %}"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg> {{ t('broadcast_sms') }}</a>
-            <a href="/settings" class="nav-item {% if request.endpoint=='settings' %}active{% endif %}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg> {{ t('settings') }}</a>
+            <a href="{{ url_for('dashboard') if current_admin else url_for('login') }}" class="brand">
+                <span class="brand-icon"><svg viewBox="0 0 24 24"><path d="M20 7h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 4h4v3h-4V4zm10 16H4V9h16v11z"/></svg></span>
+                GaragePro
+            </a>
+        </div>
+        <div class="header-right">
+            {% if current_admin %}
+            <span>{{ current_admin.username }}</span>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if current_admin %}
+    <!-- Sidebar overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-brand">
+                <span class="brand-icon"><svg viewBox="0 0 24 24"><path d="M20 7h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v3H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V9c0-1.1-.9-2-2-2zM10 4h4v3h-4V4zm10 16H4V9h16v11z"/></svg></span>
+                GaragePro
+            </div>
+            <button class="close-btn" onclick="toggleSidebar()">
+                <svg width="20" height="20" viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item {% if request.endpoint=='dashboard' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                {{ t('home') }}
+            </a>
+            <a href="/transactions" class="nav-item {% if request.endpoint=='all_transactions' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                {{ t('transactions') }}
+            </a>
+            <a href="/parties" class="nav-item {% if request.endpoint in ['parties','party_detail','edit_party','add_party'] %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                {{ t('parties') }}
+            </a>
+            <a href="/garage-transactions" class="nav-item {% if request.endpoint=='garage_transactions' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                {{ t('garage_expenses') }}
+            </a>
+            <a href="/vehicles" class="nav-item {% if request.endpoint in ['vehicle_status','vehicle_history'] %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.22.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+                {{ t('vehicle_status') }}
+            </a>
+            {% if session.get('admin_role') == 'admin' %}
+            <a href="/admins" class="nav-item {% if request.endpoint=='manage_admins' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>
+                {{ t('admins') }}
+            </a>
+            {% endif %}
+            <a href="/broadcast-sms" class="nav-item {% if request.endpoint=='broadcast_sms' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                {{ t('broadcast_sms') }}
+            </a>
+            <a href="/settings" class="nav-item {% if request.endpoint=='settings' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>
+                {{ t('settings') }}
+            </a>
         </nav>
-        <div class="sidebar-footer"><a href="/logout" class="logout-btn">{{ t('logout') }}</a></div>
+        <div class="sidebar-footer">
+            <a href="/logout" class="logout-btn">{{ t('logout') }}</a>
+        </div>
     </aside>
+    {% endif %}
+
+    <!-- Main Content -->
     <main class="main-content">
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% for category, message in messages %}
@@ -114,17 +264,39 @@
         {% endwith %}
         {% block content %}{% endblock %}
     </main>
+
+    {% if current_admin %}
+    <!-- Bottom Navigation (mobile) -->
     <nav class="bottom-nav">
         <div class="bottom-nav-inner">
-            <a href="/dashboard" class="{% if request.endpoint=='dashboard' %}active{% endif %}"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>{{ t('home') }}</a>
-            <a href="/transactions" class="{% if request.endpoint=='all_transactions' %}active{% endif %}"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>{{ t('bills') }}</a>
-            <a href="/parties" class="{% if request.endpoint in ['parties','party_detail'] %}active{% endif %}"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>{{ t('parties') }}</a>
-            <a href="/settings" class="{% if request.endpoint=='settings' %}active{% endif %}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>{{ t('more') }}</a>
+            <a href="/dashboard" class="{% if request.endpoint=='dashboard' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                {{ t('home') }}
+            </a>
+            <a href="/transactions" class="{% if request.endpoint=='all_transactions' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+                {{ t('bills') }}
+            </a>
+            <a href="/parties" class="{% if request.endpoint in ['parties','party_detail'] %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                {{ t('parties') }}
+            </a>
+            <a href="/settings" class="{% if request.endpoint=='settings' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.07.62-.07.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58z"/></svg>
+                {{ t('more') }}
+            </a>
         </div>
     </nav>
+    {% endif %}
+
     <script>
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); }
-        setTimeout(() => { document.querySelectorAll('.flash-msg').forEach(el => el.style.display = 'none'); }, 4000);
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        }
+        setTimeout(() => {
+            document.querySelectorAll('.flash-msg').forEach(el => el.style.display = 'none');
+        }, 4000);
     </script>
     {% block scripts %}{% endblock %}
 </body>

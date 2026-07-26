@@ -815,5 +815,8 @@ def export_parties():
         cw.writerow([p.id, p.name, p.phone, p.email, p.vehicle_number, p.total_due, p.total_paid, p.total_due-p.total_paid])
     return Response(si.getvalue(), mimetype='text/csv', headers={'Content-Disposition': 'attachment;filename=parties.csv'})
 
+import os
+
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)

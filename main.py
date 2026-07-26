@@ -18,10 +18,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'garage-pro-secure-key-2025'
 import os
 
-app.config["SQLALCHEMY_DATABASE_URI"] = (
-    os.environ.get("DATABASE_URL")
-    or "sqlite:///instance/garage.db"
-)
+database_url = os.environ.get('DATABASE_URL', 'sqlite:///garage.db')
+if database_url and database_url.startswith('postgres://'):
+    database_url = database_url.replace('postgres://', 'postgresql://', 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024
